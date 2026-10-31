@@ -1,53 +1,206 @@
 {
-  "1": "Christopher Marte",
-  "2": "Harvey D. Epstein",
-  "3": "Carl Wilson",
-  "4": "Virginia Maloney",
-  "5": "Julie Menin",
-  "6": "Gale A. Brewer",
-  "7": "Shaun Abreu",
-  "8": "Elsie Encarnación",
-  "9": "Yusef Salaam",
-  "10": "Carmen N. De La Rosa",
-  "11": "Eric Dinowitz",
-  "12": "Kevin C. Riley",
-  "13": "Shirley Aldebol",
-  "14": "Pierina Ana Sanchez",
-  "15": "Oswald J. Feliz",
-  "16": "Althea V.  Stevens",
-  "17": "Justin E. Sanchez",
-  "18": "Amanda C. Farías",
-  "19": "Vickie Paladino",
-  "20": "Sandra Ung",
-  "21": "Shanel Thomas-Henry",
-  "22": "Tiffany L. Cabán",
-  "23": "Linda Lee",
-  "24": "James F. Gennaro",
-  "25": "Shekar Krishnan",
-  "26": "Julie Won",
-  "27": "Nantasha M. Williams",
-  "28": "Ty Hankerson",
-  "29": "Lynn C. Schulman",
-  "30": "Phil Wong",
-  "31": "Selvena N. Brooks-Powers",
-  "32": "Joann Ariola",
-  "33": "Lincoln Restler",
-  "34": "Jennifer Gutiérrez",
-  "35": "Crystal Hudson",
-  "36": "Chi A. Ossé",
-  "37": "Sandy Nurse",
-  "38": "Alexa Avilés",
-  "39": "Shahana K. Hanif",
-  "40": "Rita C. Joseph",
-  "41": "Darlene Mealy",
-  "42": "Chris Banks",
-  "43": "Susan Zhuang",
-  "44": "Simcha Felder",
-  "45": "Farah N. Louis",
-  "46": "Mercedes Narcisse",
-  "47": "Kayla Santosuosso",
-  "48": "Inna Vernikov",
-  "49": "Kamillah Hanks",
-  "50": "David M. Carr",
-  "51": "Frank Morano"
+  "1": {
+    "name": "Christopher Marte",
+    "party": "D"
+  },
+  "2": {
+    "name": "Harvey D. Epstein",
+    "party": "D"
+  },
+  "3": {
+    "name": "Carl Wilson",
+    "party": "D"
+  },
+  "4": {
+    "name": "Virginia Maloney",
+    "party": "D"
+  },
+  "5": {
+    "name": "Julie Menin",
+    "party": "D"
+  },
+  "6": {
+    "name": "Gale A. Brewer",
+    "party": "D"
+  },
+  "7": {
+    "name": "Shaun Abreu",
+    "party": "D"
+  },
+  "8": {
+    "name": "Elsie Encarnación",
+    "party": "D"
+  },
+  "9": {
+    "name": "Yusef Salaam",
+    "party": "D"
+  },
+  "10": {
+    "name": "Carmen N. De La Rosa",
+    "party": "D"
+  },
+  "11": {
+    "name": "Eric Dinowitz",
+    "party": "D"
+  },
+  "12": {
+    "name": "Kevin C. Riley",
+    "party": "D"
+  },
+  "13": {
+    "name": "Shirley Aldebol",
+    "party": "D"
+  },
+  "14": {
+    "name": "Pierina Ana Sanchez",
+    "party": "D"
+  },
+  "15": {
+    "name": "Oswald J. Feliz",
+    "party": "D"
+  },
+  "16": {
+    "name": "Althea V.  Stevens",
+    "party": "D"
+  },
+  "17": {
+    "name": "Justin E. Sanchez",
+    "party": "D"
+  },
+  "18": {
+    "name": "Amanda C. Farías",
+    "party": "D"
+  },
+  "19": {
+    "name": "Vickie Paladino",
+    "party": "R"
+  },
+  "20": {
+    "name": "Sandra Ung",
+    "party": "D"
+  },
+  "21": {
+    "name": "Shanel Thomas-Henry",
+    "party": "D"
+  },
+  "22": {
+    "name": "Tiffany L. Cabán",
+    "party": "D"
+  },
+  "23": {
+    "name": "Linda Lee",
+    "party": "D"
+  },
+  "24": {
+    "name": "James F. Gennaro",
+    "party": "D"
+  },
+  "25": {
+    "name": "Shekar Krishnan",
+    "party": "D"
+  },
+  "26": {
+    "name": "Julie Won",
+    "party": "D"
+  },
+  "27": {
+    "name": "Nantasha M. Williams",
+    "party": "D"
+  },
+  "28": {
+    "name": "Ty Hankerson",
+    "party": "D"
+  },
+  "29": {
+    "name": "Lynn C. Schulman",
+    "party": "D"
+  },
+  "30": {
+    "name": "Phil Wong",
+    "party": "D"
+  },
+  "31": {
+    "name": "Selvena N. Brooks-Powers",
+    "party": "D"
+  },
+  "32": {
+    "name": "Joann Ariola",
+    "party": "R"
+  },
+  "33": {
+    "name": "Lincoln Restler",
+    "party": "D"
+  },
+  "34": {
+    "name": "Jennifer Gutiérrez",
+    "party": "D"
+  },
+  "35": {
+    "name": "Crystal Hudson",
+    "party": "D"
+  },
+  "36": {
+    "name": "Chi A. Ossé",
+    "party": "D"
+  },
+  "37": {
+    "name": "Sandy Nurse",
+    "party": "D"
+  },
+  "38": {
+    "name": "Alexa Avilés",
+    "party": "D"
+  },
+  "39": {
+    "name": "Shahana K. Hanif",
+    "party": "D"
+  },
+  "40": {
+    "name": "Rita C. Joseph",
+    "party": "D"
+  },
+  "41": {
+    "name": "Darlene Mealy",
+    "party": "D"
+  },
+  "42": {
+    "name": "Chris Banks",
+    "party": "D"
+  },
+  "43": {
+    "name": "Susan Zhuang",
+    "party": "D"
+  },
+  "44": {
+    "name": "Simcha Felder",
+    "party": "D"
+  },
+  "45": {
+    "name": "Farah N. Louis",
+    "party": "D"
+  },
+  "46": {
+    "name": "Mercedes Narcisse",
+    "party": "D"
+  },
+  "47": {
+    "name": "Kayla Santosuosso",
+    "party": "D"
+  },
+  "48": {
+    "name": "Inna Vernikov",
+    "party": "R"
+  },
+  "49": {
+    "name": "Kamillah Hanks",
+    "party": "D"
+  },
+  "50": {
+    "name": "David M. Carr",
+    "party": "R"
+  },
+  "51": {
+    "name": "Frank Morano",
+    "party": "R"
+  }
 }

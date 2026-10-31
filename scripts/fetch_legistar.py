@@ -42,6 +42,13 @@ def district_by_person_id():
 
 PERSON_DISTRICTS = {}
 
+REPUBLICAN_CONFERENCE_BODY_ID = 5264
+
+def republican_person_ids():
+    """Legistar has no party field; membership in the Minority (Republican) Conference is the signal."""
+    recs = api_get("officerecords", {"$filter": f"OfficeRecordBodyId eq {REPUBLICAN_CONFERENCE_BODY_ID} and OfficeRecordEndDate ge datetime'{YEAR}-01-01'"})
+    return {r["OfficeRecordPersonId"] for r in recs}
+
 def api_get(endpoint, params=None):
     params = params or {}
     if TOKEN:
@@ -94,6 +101,11 @@ def main():
     bills_output = []
     members = {}  # district -> member name, collected from the vote records (latest wins)
     PERSON_DISTRICTS.update(district_by_person_id())
+    republicans = republican_person_ids()
+    party_overrides = {}
+    po = Path("data/party_overrides.json")  # {"<district>": "I"} for members who are neither R nor D
+    if po.exists():
+        party_overrides = {k: v for k, v in json.loads(po.read_text()).items() if not k.startswith("_")}
     
     for ev in events:
         event_id = ev["EventId"]
@@ -118,7 +130,8 @@ def main():
                     person_name = v.get("VotePersonName", "")
                     dist_id = match_district(person_name, v.get("VotePersonId"))
                     if dist_id:
-                        members[str(dist_id)] = person_name.strip()
+                        party = party_overrides.get(str(dist_id)) or ("R" if v.get("VotePersonId") in republicans else "D")
+                        members[str(dist_id)] = {"name": person_name.strip(), "party": party}
                         district_votes[str(dist_id)] = map_vote_value(v.get("VoteValueName"))
                 
                 if district_votes:

@@ -124,7 +124,7 @@
 <script>
   const APPROVED_BILLS = [];   // filled from data/votes.json (see loadLiveLegistarVotes)
   const BILLS_BY_DATE = {};
-  let MEMBERS = {};            // district -> member name (data/members.json)
+  let MEMBERS = {};            // district -> {name, party} (data/members.json)
   let GEO = null;              // district boundaries (data/districts.geojson)
 
   const BOROUGHS = {
@@ -134,6 +134,7 @@
     Brooklyn: [33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48],
     "Staten Island": [49,50,51]
   };
+  const memberLabel = d => MEMBERS[d] ? `${MEMBERS[d].name} - ${MEMBERS[d].party}` : "";
   const boroughOf = d => Object.keys(BOROUGHS).find(b => BOROUGHS[b].includes(d)) || "";
   const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const $ = id => document.getElementById(id);
@@ -246,7 +247,7 @@
   function tipFor(d) {
     const v = voteOf(d);
     const label = v === "yes" ? "Voted YES" : v === "no" ? "Voted NO" : v ? "Excused / abstained" : "";
-    return `<b>${esc(MEMBERS[d] || "Council Member")}</b><br>District ${d} · ${boroughOf(d)}${label ? `<br>${label}` : ""}`;
+    return `<b>${esc(memberLabel(d) || "Council Member")}</b><br>District ${d} · ${boroughOf(d)}${label ? `<br>${label}` : ""}`;
   }
 
   const tip = $("tooltip");
@@ -316,12 +317,12 @@
     if (!b) sum.innerHTML = `<span class="empty" style="padding:0">Select a stated-meeting day and bill to see how each district voted.</span>`;
     else sum.innerHTML = `<b>${esc(b.id)}</b> · ${fmtDate(b.date)}<br>${esc(b.summary || b.title)}<br><a href="${esc(b.legistarUrl)}" target="_blank" rel="noopener">View on Legistar ↗</a>`;
     const rows = d3.range(1, 52).filter(d => {
-      const hay = `district ${d} ${MEMBERS[d] || ""} ${boroughOf(d)}`.toLowerCase();
+      const hay = `district ${d} ${MEMBERS[d]?.name || ""} ${boroughOf(d)}`.toLowerCase();
       return !q || hay.includes(q) || String(d) === q;
     }).map(d => {
       const v = voteOf(d);
       const badge = v ? `<span class="badge ${voteClass(v)}">${v === "yes" ? "YES" : v === "no" ? "NO" : "EXCUSED"}</span>` : "";
-      return `<div class="row" data-d="${d}"><div class="d">District ${d}<small>${boroughOf(d)}</small></div><div class="n">${esc(MEMBERS[d] || "—")}</div>${badge}</div>`;
+      return `<div class="row" data-d="${d}"><div class="d">District ${d}<small>${boroughOf(d)}</small></div><div class="n">${esc(memberLabel(d) || "—")}</div>${badge}</div>`;
     });
     $("roster").innerHTML = rows.join("") || `<div class="empty">No matches.</div>`;
     $("roster").querySelectorAll(".row").forEach(r => {
