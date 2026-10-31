@@ -27,6 +27,21 @@ LAST_NAME_TO_DISTRICT = {
     "Carr": 50, "Morano": 51
 }
 
+def district_by_person_id():
+    """PersonId -> district, from the council.nyc.gov/district-N/ link on each member's record.
+    Members whose link is a name slug are covered by data/district_overrides.json."""
+    out = {}
+    for p in api_get("persons", {"$filter": "PersonActiveFlag eq 1"}):
+        m = re.search(r"/district-(\d{1,2})", p.get("PersonWWW") or "")
+        if m and 1 <= int(m.group(1)) <= 51:
+            out[p["PersonId"]] = int(m.group(1))
+    overrides = Path("data/district_overrides.json")
+    if overrides.exists():
+        out.update({int(k): v for k, v in json.loads(overrides.read_text()).items() if not k.startswith("_")})
+    return out
+
+PERSON_DISTRICTS = {}
+
 def api_get(endpoint, params=None):
     params = params or {}
     if TOKEN:
@@ -45,7 +60,9 @@ _PATTERNS = [(re.compile(r"\b" + re.escape(_fold(k)) + r"$"), d) for k, d in LAS
 NOT_DISTRICT_MEMBERS = ("jumaane",)
 UNMATCHED = set()
 
-def match_district(person_name):
+def match_district(person_name, person_id=None):
+    if person_id in PERSON_DISTRICTS:
+        return PERSON_DISTRICTS[person_id]
     name = re.sub(r"\s+(jr|sr|ii|iii)\.?$", "", _fold(person_name).strip())
     if any(n in name for n in NOT_DISTRICT_MEMBERS):
         return None
@@ -75,6 +92,7 @@ def main():
     events = api_get("events", {"$filter": odata_filter, "$orderby": "EventDate asc"})
     
     bills_output = []
+    PERSON_DISTRICTS.update(district_by_person_id())
     
     for ev in events:
         event_id = ev["EventId"]
@@ -82,8 +100,9 @@ def main():
         items = api_get(f"events/{event_id}/eventitems")
         
         for item in items:
-            # Filter strictly for approved legislation that had a roll call vote
-            if item.get("EventItemPassedFlag") == 1 and item.get("EventItemRollCallFlag") == 1:
+            # Approved legislation (RollCallFlag is unreliable: approved items carry 0, so we
+            # rely on the votes endpoint returning records instead)
+            if item.get("EventItemPassedFlag") == 1:
                 matter_file = item.get("EventItemMatterFile") or ""
                 if not matter_file.startswith(("Int", "Res")):
                     continue
@@ -96,7 +115,7 @@ def main():
                 district_votes = {}
                 for v in raw_votes:
                     person_name = v.get("VotePersonName", "")
-                    dist_id = match_district(person_name)
+                    dist_id = match_district(person_name, v.get("VotePersonId"))
                     if dist_id:
                         district_votes[str(dist_id)] = map_vote_value(v.get("VoteValueName"))
                 

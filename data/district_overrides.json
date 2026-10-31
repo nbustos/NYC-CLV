@@ -1,0 +1,6 @@
+{
+  "_comment": "PersonId -> district for members whose Legistar PersonWWW is a name slug. Verified against council.nyc.gov member pages.",
+  "7897": 17,
+  "7810": 18,
+  "7898": 21
+}
