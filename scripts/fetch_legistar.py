@@ -39,14 +39,14 @@ def _fold(text):
     """Lowercase and strip accents so 'Farías' == 'farias'."""
     return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode().lower()
 
-# Whole-word match (not substring), so "Lee" can't hit "Fleetwood" or "Joseph" a first name.
-_PATTERNS = [(re.compile(r"\b" + re.escape(_fold(k)) + r"\b"), d) for k, d in LAST_NAME_TO_DISTRICT.items()]
+# Match the surname at the end of the name, so "Joseph" in "Joseph Borelli" or "Lee" in "Fleetwood" can't hit.
+_PATTERNS = [(re.compile(r"\b" + re.escape(_fold(k)) + r"$"), d) for k, d in LAST_NAME_TO_DISTRICT.items()]
 # Non-voting Public Advocate shares a surname with District 27's member
 NOT_DISTRICT_MEMBERS = ("jumaane",)
 UNMATCHED = set()
 
 def match_district(person_name):
-    name = _fold(person_name)
+    name = re.sub(r"\s+(jr|sr|ii|iii)\.?$", "", _fold(person_name).strip())
     if any(n in name for n in NOT_DISTRICT_MEMBERS):
         return None
     for pat, dist_id in _PATTERNS:
