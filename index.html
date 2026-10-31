@@ -14,6 +14,7 @@
     --ink: #1c2433; --muted: #5d6b7e; --panel: #fff; --bg: #f3f5f8; --accent: #2a4d8f;
   }
   * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
   body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: var(--bg); }
   header { padding: 14px 24px 4px; display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
   h1 { margin: 0; font-size: 22px; }
@@ -23,7 +24,7 @@
   /* Timeline */
   #timeline-wrap { margin: 8px 24px 0; background: var(--panel); border-radius: 12px; padding: 10px 14px 8px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
   #timeline-hint { font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  #timeline { width: 100%; height: 92px; display: block; }
+  #timeline { width: 100%; height: 92px; display: block; touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
   .month-label { font-size: 11px; font-weight: 600; fill: var(--muted); }
   .day-tick { stroke: #d5dbe3; stroke-width: 1; }
   .vote-bar { fill: #5cb985; cursor: pointer; }
@@ -32,6 +33,10 @@
   .focus-label { font-size: 11px; font-weight: 600; fill: var(--ink); text-anchor: middle; pointer-events: none; }
 
   #meeting { margin: 12px 24px 0; }
+  #meeting-nav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  #meeting-nav button { border: 1px solid #c9d1dc; background: #fff; border-radius: 8px; min-width: 44px; height: 36px; font-size: 20px; line-height: 1; cursor: pointer; }
+  .hint-touch { display: none; }
+  @media (hover: none) { .hint-desktop { display: none; } .hint-touch { display: inline; } }
   #meeting-date { display: inline-block; background: var(--accent); color: #fff; font-weight: 600; padding: 6px 14px; border-radius: 8px; font-size: 14px; }
   #chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; max-height: 128px; overflow-y: auto; }
   .chip { border: 1px solid #c9d1dc; background: #fff; border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; max-width: 440px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: inherit; }
@@ -85,6 +90,34 @@
   .badge.no { background: #fdeaea; color: var(--no-ink); border-color: var(--no-edge); }
   .badge.other { background: #faf4dc; color: #7a6420; border-color: var(--other-edge); }
   .empty { color: var(--muted); padding: 16px; font-size: 13px; }
+
+  /* Mobile */
+  @media (max-width: 700px) {
+    header { padding: 12px 12px 2px; gap: 8px 12px; }
+    h1 { font-size: 18px; }
+    select { font-size: 16px; padding: 4px 8px; }
+    #timeline-wrap { margin: 8px 8px 0; padding: 8px 10px 6px; }
+    #timeline { height: 104px; }
+    #meeting { margin: 10px 8px 0; }
+    #meeting-date { font-size: 13px; padding: 8px 12px; }
+    #meeting-nav button { height: 40px; min-width: 48px; }
+    #chips { max-height: 160px; }
+    .chip { max-width: 100%; min-height: 44px; padding: 8px 12px; }
+    .pill { font-size: 13px; }
+    main { margin: 10px 8px 16px; gap: 10px; }
+    #map-card { min-height: 0; display: flex; flex-direction: column; }
+    #map { min-height: 0; height: 112vw; max-height: 560px; }
+    #bill-card { position: static; width: auto; margin: 10px 10px 0; pointer-events: auto; order: -1; }
+    #controls { position: static; transform: none; order: 2; border-radius: 0; box-shadow: none; max-width: none; justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 6px 8px; }
+    #controls button { flex: none; min-height: 44px; white-space: nowrap; }
+    #zoom { top: auto; bottom: 62px; right: 10px; }
+    #zoom button { width: 44px; height: 44px; }
+    #inspector { max-height: 70vh; }
+    #search { font-size: 16px; padding: 10px; }
+    .row { padding: 10px 6px; font-size: 14px; }
+    .row .d { width: 76px; }
+    #tooltip { max-width: 200px; }
+  }
 </style>
 </head>
 <body>
@@ -95,12 +128,12 @@
 </header>
 
 <div id="timeline-wrap">
-  <div id="timeline-hint"><span id="timeline-count"></span><span>Move cursor over the timeline to magnify dates · click a green bar to load its votes</span></div>
+  <div id="timeline-hint"><span id="timeline-count"></span><span><span class="hint-desktop">Move cursor over the timeline to magnify dates · click a green bar to load its votes</span><span class="hint-touch">Touch and drag along the timeline to magnify · lift your finger to pick a day · or use ‹ ›</span></span></div>
   <svg id="timeline"></svg>
 </div>
 
 <div id="meeting">
-  <span id="meeting-date" hidden></span>
+  <div id="meeting-nav"><button id="prev" aria-label="Previous meeting day">‹</button><button id="next" aria-label="Next meeting day">›</button><span id="meeting-date" hidden></span></div>
   <div id="chips"></div>
   <div id="tally"></div>
 </div>
@@ -177,10 +210,7 @@
     const voteDays = Object.keys(BILLS_BY_DATE).filter(d => d.startsWith(y + "-")).sort();
     tl.append("g").attr("class", "bars").selectAll("rect").data(voteDays).join("rect")
       .attr("class", "vote-bar").attr("y", 30).attr("height", 44).attr("rx", 3)
-      .classed("selected", d => d === state.date)
-      .on("click", (_, d) => selectDate(d))
-      .on("mousemove", (ev, d) => showTip(ev, `<b>${fmtDate(d)}</b><br>${BILLS_BY_DATE[d].length} approved bills`))
-      .on("mouseleave", hideTip);
+      .classed("selected", d => d === state.date);
     tl.append("g").attr("class", "focus");
     $("timeline-count").textContent = `${voteDays.length} stated-meeting days · ${voteDays.reduce((s, d) => s + BILLS_BY_DATE[d].length, 0)} approved bills in ${y}`;
     layoutTimeline();
@@ -199,8 +229,42 @@
       .attr("x", d => Xc(dayOfYear(d))).text(d => { const [, m, dd] = d.split("-"); return `${MONTHS[+m - 1]} ${+dd}`; });
   }
 
-  $("timeline").addEventListener("mousemove", e => { tlFocus = e.clientX - $("timeline").getBoundingClientRect().left; layoutTimeline(); });
-  $("timeline").addEventListener("mouseleave", () => { tlFocus = null; layoutTimeline(); });
+  // Unified mouse/touch handling. Touch: press and drag to magnify, lift to select the nearest bar.
+  const tlEl = $("timeline");
+  const tlX = e => e.clientX - tlEl.getBoundingClientRect().left;
+  const reach = e => e.pointerType === "mouse" ? 8 : 24;
+  let pressed = false;
+
+  function nearestBar(x, maxPx) {
+    const dayW = tlW / daysIn(state.year);
+    let best = null, bd = maxPx;
+    tl.selectAll(".vote-bar").each(d => {
+      const dist = Math.abs(fisheye((dayOfYear(d) + .5) * dayW) - x);
+      if (dist <= bd) { bd = dist; best = d; }
+    });
+    return best;
+  }
+  function tlHover(e) {
+    const d = nearestBar(tlX(e), reach(e));
+    if (!d) return hideTip();
+    const html = `<b>${fmtDate(d)}</b><br>${BILLS_BY_DATE[d].length} approved bills`;
+    showTip(e.pointerType === "mouse" ? e : { clientX: e.clientX - 60, clientY: e.clientY - 90 }, html);
+  }
+  tlEl.addEventListener("pointerdown", e => { pressed = true; tlFocus = tlX(e); layoutTimeline(); tlHover(e); });
+  tlEl.addEventListener("pointermove", e => {
+    if (e.pointerType !== "mouse" && !pressed) return;
+    tlFocus = tlX(e); layoutTimeline(); tlHover(e);
+  });
+  tlEl.addEventListener("pointerup", e => {
+    pressed = false;
+    const d = nearestBar(tlX(e), reach(e));
+    hideTip();
+    if (e.pointerType !== "mouse") tlFocus = null;
+    if (d) selectDate(d);
+    layoutTimeline();
+  });
+  tlEl.addEventListener("pointerleave", e => { if (e.pointerType === "mouse") { tlFocus = null; layoutTimeline(); hideTip(); } });
+  tlEl.addEventListener("pointercancel", () => { pressed = false; tlFocus = null; layoutTimeline(); hideTip(); });
   window.addEventListener("resize", () => { if (state.year) drawTimeline(); });
 
   /* -------------------------------- Map --------------------------------- */
@@ -224,7 +288,7 @@
       gMap.attr("transform", e.transform);
       gMap.selectAll(".dlabel").style("font-size", (11 / Math.sqrt(e.transform.k)) + "px");
     });
-    svg.call(zoomBehavior);
+    svg.call(zoomBehavior).style("touch-action", "pan-y");  // vertical swipe scrolls the page; pinch/drag-sideways handled by d3
     paintMap();
   }
 
@@ -253,9 +317,11 @@
   const tip = $("tooltip");
   function showTip(ev, html) {
     tip.innerHTML = html; tip.style.opacity = 1;
-    tip.style.left = Math.min(ev.clientX + 14, innerWidth - 250) + "px"; tip.style.top = (ev.clientY + 14) + "px";
+    tip.style.left = Math.max(4, Math.min(ev.clientX + 14, innerWidth - 210)) + "px"; tip.style.top = Math.max(4, ev.clientY + 14) + "px";
   }
   function hideTip() { tip.style.opacity = 0; }
+
+  document.addEventListener("pointerdown", e => { if (!e.target.closest(".district, #timeline")) hideTip(); });
 
   $("zin").onclick = () => svg.transition().duration(250).call(zoomBehavior.scaleBy, 1.6);
   $("zout").onclick = () => svg.transition().duration(250).call(zoomBehavior.scaleBy, 1 / 1.6);
@@ -280,6 +346,21 @@
     tl.selectAll(".vote-bar").classed("selected", d => d === date);
     selectBill(bills[0]);
   }
+
+  function goToDate(date) {
+    const y = +date.slice(0, 4);
+    if (y !== state.year) { state.year = y; $("year").value = y; drawTimeline(); }
+    selectDate(date);
+  }
+  function stepMeeting(dir) {
+    const dates = Object.keys(BILLS_BY_DATE).sort();
+    if (!dates.length) return;
+    const i = state.date ? dates.indexOf(state.date) : (dir > 0 ? -1 : dates.length);
+    const j = Math.min(dates.length - 1, Math.max(0, i + dir));
+    goToDate(dates[j]);
+  }
+  $("prev").onclick = () => stepMeeting(-1);
+  $("next").onclick = () => stepMeeting(1);
 
   function selectBill(b) {
     state.bill = b || null;
