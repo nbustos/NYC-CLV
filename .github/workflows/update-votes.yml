@@ -1,0 +1,38 @@
+name: Sync NYC Council Legistar Votes
+
+on:
+  schedule:
+    # Runs every day at 6:00 AM UTC (2:00 AM EDT)
+    - cron: '0 6 * * *'
+  workflow_dispatch: # Allows manual trigger from the GitHub Actions tab
+
+permissions:
+  contents: write # Required so the action can commit updated JSON back to the repo
+
+jobs:
+  update-legistar-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install requests
+        run: pip install requests
+
+      - name: Fetch Approved Bills & Roll Call Votes from Legistar API
+        env:
+          LEGISTAR_TOKEN: ${{ secrets.LEGISTAR_TOKEN }}
+          TARGET_YEAR: "2026"
+        run: python scripts/fetch_legistar.py
+
+      - name: Commit and Push updated votes.json
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/votes.json
+          git diff --staged --quiet || (git commit -m "chore(data): update NYC Council roll-call votes" && git push)

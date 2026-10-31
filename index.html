@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NYC Council Vote Mapper</title>
+</head>
+<body>
+  <h1>NYC Council Vote Mapper</h1>
+  <p id="status">Loading votes…</p>
+  <ul id="bills"></ul>
+  <script>
+    // Placeholder app: replace with the real index.html (keep the loader below before initApp()).
+    const APPROVED_BILLS = [];   // built-in fallback dataset goes here
+    const BILLS_BY_DATE = {};
+
+    function initApp() {
+      document.getElementById("status").textContent =
+        APPROVED_BILLS.length ? `${APPROVED_BILLS.length} approved bills` : "No votes loaded yet.";
+      document.getElementById("bills").innerHTML = APPROVED_BILLS.map(b =>
+        `<li>${b.date} · <a href="${b.legistarUrl}">${b.id}</a> — ${b.title} (${Object.keys(b.votes).length} districts)</li>`).join("");
+    }
+
+    async function loadLiveLegistarVotes() {
+      try {
+        const res = await fetch('./data/votes.json', { cache: 'no-store' });
+        if (res.ok) {
+          const liveBills = await res.json();
+          if (Array.isArray(liveBills) && liveBills.length > 0) {
+            APPROVED_BILLS.length = 0;
+            APPROVED_BILLS.push(...liveBills);
+            // Rebuild the date index map
+            Object.keys(BILLS_BY_DATE).forEach(k => delete BILLS_BY_DATE[k]);
+            APPROVED_BILLS.forEach(b => {
+              if (!BILLS_BY_DATE[b.date]) BILLS_BY_DATE[b.date] = [];
+              BILLS_BY_DATE[b.date].push(b);
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('Using built-in dataset (data/votes.json not found yet):', err);
+      }
+      initApp();
+    }
+
+    loadLiveLegistarVotes();
+  </script>
+</body>
+</html>
