@@ -141,7 +141,7 @@ def main():
                         "title": item.get("EventItemMatterName") or item.get("EventItemTitle") or matter_file,
                         "category": item.get("EventItemMatterType") or "Legislation",
                         "summary": item.get("EventItemTitle") or "",
-                        "legistarUrl": f"https://legistar.council.nyc.gov/LegislationDetail.aspx?ID={item.get('EventItemMatterId')}&GUID=",
+                        "legistarUrl": f"https://legistar.council.nyc.gov/gateway.aspx?M=L&ID={item.get('EventItemMatterId')}",  # gateway redirects to the detail page; API MatterId != web ID,
                         "votes": district_votes
                     })
 
