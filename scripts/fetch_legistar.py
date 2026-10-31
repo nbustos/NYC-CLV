@@ -92,6 +92,7 @@ def main():
     events = api_get("events", {"$filter": odata_filter, "$orderby": "EventDate asc"})
     
     bills_output = []
+    members = {}  # district -> member name, collected from the vote records (latest wins)
     PERSON_DISTRICTS.update(district_by_person_id())
     
     for ev in events:
@@ -117,6 +118,7 @@ def main():
                     person_name = v.get("VotePersonName", "")
                     dist_id = match_district(person_name, v.get("VotePersonId"))
                     if dist_id:
+                        members[str(dist_id)] = person_name.strip()
                         district_votes[str(dist_id)] = map_vote_value(v.get("VoteValueName"))
                 
                 if district_votes:
@@ -131,6 +133,9 @@ def main():
                     })
 
     out_dir = Path("data")
+    (out_dir).mkdir(exist_ok=True)
+    with open(out_dir / "members.json", "w", encoding="utf-8") as f:
+        json.dump(dict(sorted(members.items(), key=lambda kv: int(kv[0]))), f, indent=2, ensure_ascii=False)
     out_dir.mkdir(exist_ok=True)
     with open(out_dir / "votes.json", "w", encoding="utf-8") as f:
         json.dump(bills_output, f, indent=2, ensure_ascii=False)
